@@ -4,7 +4,7 @@
 
 ## **1-dars umumiy tanishuv va BearBox dasturi**
 
-- `src/store/bearStore.tsx`
+`src/store/bearStore.tsx`
 
 ```tsx
 import { create } from "zustand";
@@ -28,7 +28,7 @@ export const useBearStore = create<TBearStoreState>((set) => ({
 - `increasePopulation: () => set((state) => ({ bears: state.bears + 1 }))` `set` funksiyasi orqali `bears` sonini bittaga oshiradi.
 - `removeAllBears: () => set({ bears: 0 })` `bears` sonini `0` ga tushiradi.
 
-- `src/components/BearBox.tsx`
+`src/components/BearBox.tsx`
 
 ```tsx
 import { useBearStore } from "../store/bearStore";
