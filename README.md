@@ -2,9 +2,9 @@
 
 ---
 
-## **1-dars umumiy tanishuv va BearBox dasturi**
+## **📌 1-dars umumiy tanishuv va BearBox dasturi**
 
-`src/store/bearStore.tsx`
+`src/store/bearStore.ts`
 
 ```tsx
 import { create } from "zustand";
@@ -28,7 +28,7 @@ export const useBearStore = create<TBearStoreState>((set) => ({
 - `increasePopulation: () => set((state) => ({ bears: state.bears + 1 }))` `set` funksiyasi orqali `bears` sonini bittaga oshiradi.
 - `removeAllBears: () => set({ bears: 0 })` `bears` sonini `0` ga tushiradi.
 
-`src/components/BearBox.tsx`
+`src/components/BearBox.ts`
 
 ```tsx
 import { useBearStore } from "../store/bearStore";
@@ -52,3 +52,138 @@ export default function BearBox() {
 ```
 
 - `useBearStore` ni chaqirish va undagi funksiyalardan foydalanish
+
+---
+
+## **📌 2-dars Object bilan ishlash**
+
+`src/store/catStore.ts`
+
+```tsx
+type TCatStoreState = {
+  cats: {
+    bigCats: number;
+    smallCats: number;
+  };
+  increaseBigCats: () => void;
+  increaseSmallCats: () => void;
+};
+```
+
+- `useCatStore` hooki uchun type
+
+`src/store/catStore.ts`
+
+```tsx
+export const useCatStore = create<TCatStoreState>((set) => ({
+  cats: {
+    bigCats: 0,
+    smallCats: 0,
+  },
+
+  increaseBigCats: () =>
+    set((state) => ({
+      cats: {
+        ...state.cats,
+        bigCats: state.cats.bigCats + 1,
+      },
+    })),
+
+  increaseSmallCats: () =>
+    set((state) => ({
+      cats: {
+        ...state.cats,
+        smallCats: state.cats.smallCats + 1,
+      },
+    })),
+}));
+```
+
+- `useCatStore` hooki
+- `set` qiymatni yangilash uchun ishlatiladi
+- `...state.cats` `cats` objectining barcha oldingi qiymatlarini nusxalaydi
+- `bigCats: state.cats.bigCats + 1` va `smallCats: state.cats.smallCats + 1` `bigCats` va `smallCats` qiymatlarini yangilaydi
+
+### **2.2-dars yuqoridagi jarayonni oldingi qiymatlarni nusxalamasdan qilish mumkin lekin buning uchun immer dan foydalanish kerak**
+
+```
+npm install immer
+
+```
+
+- immer kutubxonasini o'rnatish
+
+```
+import { immer } from "zustand/middleware/immer";
+```
+
+- uni import qilish
+
+`src/store/catStore.ts`
+
+```ts
+export const useCatStore = create<TCatStoreState>()(
+  immer((set) => ({
+    cats: {
+      bigCats: 0,
+      smallCats: 0,
+    },
+
+    increaseBigCats: () => {
+      set((state) => {
+        state.cats.bigCats++;
+      });
+    },
+
+    increaseSmallCats: () => {
+      set((state) => {
+        state.cats.smallCats++;
+      });
+    },
+  }))
+);
+```
+
+- undan foydalanish
+
+`src/store/catStore.ts`
+
+```ts
+type TCatStoreState = {
+  cats: {
+    bigCats: number;
+    smallCats: number;
+  };
+  increaseBigCats: () => void;
+  increaseSmallCats: () => void;
+  summary: () => void;
+};
+
+export const useCatStore = create<TCatStoreState>()(
+  immer((set, get) => ({
+    cats: {
+      bigCats: 0,
+      smallCats: 0,
+    },
+
+    increaseBigCats: () => {
+      set((state) => {
+        state.cats.bigCats++;
+      });
+    },
+
+    increaseSmallCats: () => {
+      set((state) => {
+        state.cats.smallCats++;
+      });
+    },
+
+    summary: () => {
+      const total = get().cats.bigCats + get().cats.smallCats;
+      return `There are ${total} cats in total.`;
+    },
+  }))
+);
+```
+
+- `get` funksiyasi ushbu kodda har doim `cats` obyektining eng oxirgi (so‘nggi) qiymatlarini oladi va saqlamaydi. U `state` ni o‘zgartirmaydi, faqat oxirgi holatini qaytaradi. `set` ishlatib `state` ni yangilab bo‘lmaydigan funksiyalar ichida, mavjud ma’lumotlarni olish uchun ishlatiladi.
