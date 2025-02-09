@@ -282,3 +282,20 @@ export default function CatController() {
 ```
 
 - `selectors` orqali `store` dagi funksiyalarni alohida componntga chaqirish
+
+## **📌 4-dars Devtools bilan ishlash**
+
+```ts
+export const useBearStore = create<TBearStoreState>()(
+  devtools(
+    (set) => ({
+      bears: 0,
+      increasePopulation: () => set((state) => ({ bears: state.bears + 1 })),
+      removeAllBears: () => set({ bears: 0 }),
+    }),
+    { enabled: true, name: "Bear Store" }
+  )
+);
+```
+
+- `redux-devtools` dan foydalanib statelarni kuzatish uchun devtools bilan o'rash kerak
