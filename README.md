@@ -4,6 +4,8 @@
 
 ## **1-dars umumiy tanishuv va BearBox dasturi**
 
+- `src/store/bearStore.tsx`
+
 ```tsx
 import { create } from "zustand";
 
@@ -20,12 +22,13 @@ export const useBearStore = create<TBearStoreState>((set) => ({
 }));
 ```
 
-- ushbu kodlar `srs/store/bearStore.tsx` faylida
 - `TBearStoreState` bu oddiy type berish loyihda typescript bo'lganligi uchun
 - `useBearStore` store yaratish va uni export qilish boshqa componentlarga chaqirilganda shu nomdan foydalaniladi
 - `bears: 0` boshlang'ich qiymat
 - `increasePopulation: () => set((state) => ({ bears: state.bears + 1 }))` `set` funksiyasi orqali `bears` sonini bittaga oshiradi.
 - `removeAllBears: () => set({ bears: 0 })` `bears` sonini `0` ga tushiradi.
+
+- `src/components/BearBox.tsx`
 
 ```tsx
 import { useBearStore } from "../store/bearStore";
@@ -48,5 +51,4 @@ export default function BearBox() {
 }
 ```
 
-- ushbu kodlar `src/components/BearBox.tsx` da yozilgan
 - `useBearStore` ni chaqirish va undagi funksiyalardan foydalanish
