@@ -12,6 +12,9 @@ export default function BearBox() {
       <div>
         <button onClick={increasePopulation}>add bear</button>
         <button onClick={removeAllBears}>remove bear</button>
+        <button onClick={useBearStore.persist.clearStorage}>
+          Clear Storage
+        </button>
       </div>
     </div>
   );

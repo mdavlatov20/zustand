@@ -283,6 +283,8 @@ export default function CatController() {
 
 - `selectors` orqali `store` dagi funksiyalarni alohida componntga chaqirish
 
+---
+
 ## **📌 4-dars Devtools bilan ishlash**
 
 ```ts
@@ -299,3 +301,111 @@ export const useBearStore = create<TBearStoreState>()(
 ```
 
 - `redux-devtools` dan foydalanib statelarni kuzatish uchun devtools bilan o'rash kerak
+
+---
+
+## **📌 5-dars persists bilan ishlash**
+
+```ts
+export const useBearStore = create<TBearStoreState>()(
+  persist(
+    (set) => ({
+      bears: 0,
+      increasePopulation: () => set((state) => ({ bears: state.bears + 1 })),
+      removeAllBears: () => set({ bears: 0 }),
+    }),
+    {
+      name: "bear store",
+    }
+  )
+);
+```
+
+- `zustand` `persist` orqali state o'zgarganda uni `bear store` nomi bilan `localstorage` ga saqlash
+
+```ts
+export const useBearStore = create<TBearStoreState>()(
+  persist(
+    (set) => ({
+      bears: 0,
+      increasePopulation: () => set((state) => ({ bears: state.bears + 1 })),
+      removeAllBears: () => set({ bears: 0 }),
+    }),
+    {
+      name: "bear store",
+      storage: createJSONStorage(() => sessionStorage),
+    }
+  )
+);
+```
+
+- `zustand` `persist` orqali state o'zgarganda uni `bear store` nomi bilan `sessionStorage` ga saqlash
+
+```ts
+type TBearStoreState = {
+  bears: number;
+  color: string;
+  size: string;
+  increasePopulation: () => void;
+  removeAllBears: () => void;
+};
+
+export const useBearStore = create<TBearStoreState>()(
+  persist(
+    (set) => ({
+      bears: 0,
+      color: "red",
+      size: "big",
+      increasePopulation: () => set((state) => ({ bears: state.bears + 1 })),
+      removeAllBears: () => set({ bears: 0 }),
+    }),
+    {
+      name: "bear store",
+      partialize: (state) => ({ bears: state.bears }),
+    }
+  )
+);
+```
+
+- bir nechta `state` bo'lsa va siz faqat bitta `state` ni `localstorage` ga saqlamoqchi bo'lsangiz bu usuldan foydalaning
+
+```ts
+type TBearStoreState = {
+  bears: number;
+  color: string;
+  size: string;
+  increasePopulation: () => void;
+  removeAllBears: () => void;
+};
+
+export const useBearStore = create<TBearStoreState>()(
+  persist(
+    (set) => ({
+      bears: 0,
+      color: "red",
+      size: "big",
+      increasePopulation: () => set((state) => ({ bears: state.bears + 1 })),
+      removeAllBears: () => set({ bears: 0 }),
+    }),
+    {
+      name: "bear store",
+      partialize: (state) =>
+        Object.fromEntries(
+          Object.entries(state).filter(
+            ([key]) => !["size", "color"].includes(key)
+          )
+        ),
+    }
+  )
+);
+```
+
+- bir nechta `state` larni filterlab qo'shish bu vaziyatda `!["size", "color"].includes(key)` `size` va `color` statelari `localstorage` ga qo'shilmaydi
+
+`src/components/BearBox.tsx`
+
+```tsx
+<button onClick={useBearStore.persist.clearStorage}>Clear Storage</button>
+```
+
+- `localstorage` dan stateni o'chirish
