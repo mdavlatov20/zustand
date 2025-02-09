@@ -187,3 +187,98 @@ export const useCatStore = create<TCatStoreState>()(
 ```
 
 - `get` funksiyasi ushbu kodda har doim `cats` obyektining eng oxirgi (so‘nggi) qiymatlarini oladi va saqlamaydi. U `state` ni o‘zgartirmaydi, faqat oxirgi holatini qaytaradi. `set` ishlatib `state` ni yangilab bo‘lmaydigan funksiyalar ichida, mavjud ma’lumotlarni olish uchun ishlatiladi.
+
+---
+
+## **📌 3-dars Selector bilan ishlash**
+
+### **Selectors’ning asosiy vazifasi**
+
+- Zustand’da barcha state’ni emas, balki faqat kerakli qismini olish uchun selectors ishlatiladi.
+- Katta state obyektidan faqat kerakli ma’lumotni olish
+- Re-renderni kamaytirish (keraksiz komponentlarni qayta render qilishni oldini olish)
+- Kodning o‘qilishi va ishlashini tezlashtirish
+
+`src/utils/createSelector.ts`
+
+```ts
+import { StoreApi, UseBoundStore } from "zustand";
+
+type WithSelectors<S> = S extends { getState: () => infer T }
+  ? S & { use: { [K in keyof T]: () => T[K] } }
+  : never;
+
+export const createSelectors = <S extends UseBoundStore<StoreApi<object>>>(
+  _store: S
+) => {
+  let store = _store as WithSelectors<typeof _store>;
+  store.use = {};
+  for (let k of Object.keys(store.getState())) {
+    (store.use as any)[k] = () => store((s) => s[k as keyof typeof s]);
+  }
+
+  return store;
+};
+```
+
+- `Zustand` da `selectors` bilan ishlash uchun ushbu fayl bo'lishi kerak
+
+`src/store/catStore.ts`
+
+```ts
+export const useCatStore = createSelectors(
+  create<TCatStoreState>()(
+    immer((set, get) => ({
+      cats: {
+        bigCats: 0,
+        smallCats: 0,
+      },
+
+      increaseBigCats: () => {
+        set((state) => {
+          state.cats.bigCats++;
+        });
+      },
+
+      increaseSmallCats: () => {
+        set((state) => {
+          state.cats.smallCats++;
+        });
+      },
+
+      summary: () => {
+        const total = get().cats.bigCats + get().cats.smallCats;
+        return `There are ${total} cats in total.`;
+      },
+    }))
+  )
+);
+```
+
+- `zustan` da `store` ni `selector` bilan yaratish
+- `createSelectors` bu selector
+
+`src/components/CatController/tsx`
+
+```tsx
+import { useCatStore } from "../store/catStore";
+
+export default function CatController() {
+  const increaseBigCats = useCatStore.use.increaseBigCats();
+  const increaseSmallCats = useCatStore.use.increaseSmallCats();
+
+  return (
+    <div className="box">
+      <h1>Cat Controller</h1>
+      <p>{Math.random()}</p>
+
+      <div>
+        <button onClick={increaseBigCats}>Add Big Cats</button>
+        <button onClick={increaseSmallCats}>Add Small Cats</button>
+      </div>
+    </div>
+  );
+}
+```
+
+- `selectors` orqali `store` dagi funksiyalarni alohida componntga chaqirish
